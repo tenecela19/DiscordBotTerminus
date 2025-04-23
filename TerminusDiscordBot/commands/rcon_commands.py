@@ -1,5 +1,8 @@
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand, SlashContext
+from discord_slash.utils.manage_commands import create_choice, create_option
+
 from utils.embed_factory import create_embed_response
 
 class RconGeneralCommands(commands.Cog):
@@ -145,3 +148,37 @@ class RconGeneralCommands(commands.Cog):
     @commands.command()
     async def check_update(self, ctx):
         await self._send_embed(ctx, self.zrcon.checkModsNeedUpdate().response)
+    @commands.command()
+    async def change_option(self, ctx, option: str, new_option: str):
+        await self._send_embed(ctx, self.zrcon.changeoption(option, new_option).response)
+
+    @commands.command()
+    async def change_password(self, ctx, password: str, new_password: str):
+        await self._send_embed(ctx, self.zrcon.changepwd(password, new_password).response)
+
+    @commands.command()
+    async def gunshot(self, ctx):
+        await self._send_embed(ctx, self.zrcon.gunshot().response)
+
+    @commands.command()
+    async def quit(self, ctx):
+        await self._send_embed(ctx, self.zrcon.quit().response)
+
+    @commands.command()
+    async def release_safehouse(self, ctx):
+        await self._send_embed(ctx, self.zrcon.releasesafehouse().response)
+
+    @commands.command()
+    async def reload_lua(self, ctx, filename: str):
+        await self._send_embed(ctx, self.zrcon.reloadlua(filename).response)
+
+    @commands.command()
+    async def replay(self, ctx, username: str, action: str, filename: str):
+        await self._send_embed(ctx, self.zrcon.replay(username, action, filename).response)
+
+    @commands.command()
+    async def voice_ban(self, ctx, username: str, enable: bool):
+        flag = "-true" if enable else "-false"
+        await self._send_embed(ctx, self.zrcon.voiceban(username, flag).response)
+
+
