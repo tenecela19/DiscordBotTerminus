@@ -33,8 +33,9 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=commands.DefaultHelpCommand(no_category='Commands'))
 
 # --- Initialize Monitors ---
-item_edit_monitor = ItemEditLogMonitor(bot, CHANNEL_ID, LOG_DIR)
-admin_log_monitor = AdminLogMonitor(bot, CHANNEL_ID, LOG_DIR)
+admin_file_path = os.path.join(os.path.dirname(__file__), "admin_bypass.json")
+item_edit_monitor = ItemEditLogMonitor(bot, CHANNEL_ID, LOG_DIR,admin_file_path)
+admin_log_monitor = AdminLogMonitor(bot, CHANNEL_ID, LOG_DIR,admin_file_path)
 perk_monitor = PerkLogMonitor(bot, CHANNEL_ID,LOG_DIR, srj_grace=SRJ_GRACE, level_window=LEVEL_WINDOW)
 exploit_monitor = ExploitLogMonitor(bot, CHANNEL_ID, EXPLOIT_LOG_PATH)
 
@@ -55,3 +56,4 @@ async def on_ready():
 # --- Run Bot ---
 if __name__ == "__main__":
     bot.run(DISCORD_TOKEN)
+
