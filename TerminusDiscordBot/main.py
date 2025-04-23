@@ -11,7 +11,7 @@ from monitors.item_edit_monitor import ItemEditLogMonitor
 from monitors.exploit_monitor import ExploitLogMonitor
 from monitors.perk_monitor import PerkLogMonitor
 from commands.admin_commands import setup_admin_commands
-from utils.admin_bypass_manager import AdminBypassManager
+from utils.admin_bypass import AdminBypassManager
 
 admin_manager = AdminBypassManager()
 load_dotenv()
@@ -56,4 +56,5 @@ async def on_ready():
 # --- Run Bot ---
 if __name__ == "__main__":
     bot.run(DISCORD_TOKEN)
+
 
