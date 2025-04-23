@@ -44,3 +44,4 @@ class AdminBypassManager:
 
     def __contains__(self, name):
         return name in self.admins
+
