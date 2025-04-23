@@ -4,26 +4,25 @@ import os
 import re
 import json
 
-ADMIN_FILE = "admin_bypass.json"
-
 class ItemEditLogMonitor:
-    def __init__(self, bot, channel_id, log_dir):
+    def __init__(self, bot, channel_id, log_dir, admin_file_path):
         self.bot = bot
         self.channel_id = channel_id
         self.log_dir = log_dir
+        self.admin_file_path = admin_file_path
         self.last_positions = {}
         self.admin_bypass = set()
         self.load_admins()
 
     def load_admins(self):
         try:
-            with open(ADMIN_FILE, 'r') as f:
+            with open(self.admin_file_path, 'r') as f:
                 self.admin_bypass = set(json.load(f))
         except (FileNotFoundError, json.JSONDecodeError):
             self.admin_bypass = set()
 
     def save_admins(self):
-        with open(ADMIN_FILE, 'w') as f:
+        with open(self.admin_file_path, 'w') as f:
             json.dump(list(self.admin_bypass), f)
 
     def get_editor_name(self, line):
@@ -70,3 +69,5 @@ class ItemEditLogMonitor:
             except Exception as e:
                 print(f"[ITEM EDIT ERROR] {e}")
             await asyncio.sleep(3)
+
+
