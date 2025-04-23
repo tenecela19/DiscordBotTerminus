@@ -70,4 +70,3 @@ class ItemEditLogMonitor:
                 print(f"[ITEM EDIT ERROR] {e}")
             await asyncio.sleep(3)
 
-

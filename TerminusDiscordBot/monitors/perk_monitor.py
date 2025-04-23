@@ -163,4 +163,3 @@ class PerkLogMonitor:
             except Exception as e:
                 print(f"[LOOP ERROR] {e}")
             await asyncio.sleep(1)
-

@@ -145,4 +145,3 @@ class RconGeneralCommands(commands.Cog):
     @commands.command()
     async def check_update(self, ctx):
         await self._send_embed(ctx, self.zrcon.checkModsNeedUpdate().response)
-
