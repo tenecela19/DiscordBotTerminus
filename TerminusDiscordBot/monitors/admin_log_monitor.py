@@ -4,26 +4,25 @@ import os
 import re
 import json
 
-ADMIN_FILE = "admin_bypass.json"
-
 class AdminLogMonitor:
-    def __init__(self, bot, channel_id, log_dir):
+    def __init__(self, bot, channel_id, log_dir, admin_file_path):
         self.bot = bot
         self.channel_id = channel_id
         self.log_dir = log_dir
+        self.admin_file_path = admin_file_path
         self.last_positions = {}
         self.admin_bypass = set()
         self.load_admins()
 
     def load_admins(self):
         try:
-            with open(ADMIN_FILE, 'r') as f:
+            with open(self.admin_file_path, 'r') as f:
                 self.admin_bypass = set(json.load(f))
         except (FileNotFoundError, json.JSONDecodeError):
             self.admin_bypass = set()
 
     def save_admins(self):
-        with open(ADMIN_FILE, 'w') as f:
+        with open(self.admin_file_path, 'w') as f:
             json.dump(list(self.admin_bypass), f)
 
     async def send_alert(self, line):
@@ -58,11 +57,12 @@ class AdminLogMonitor:
 
                 for line in new_lines:
                     actor = self.get_actor_name(line)
+                    if not actor:
+                        continue
                     if re.search(r"granted\\s+\\d+\\s+access level", line, re.IGNORECASE):
                         await self.send_alert(line)
                         continue
-                    actor = next((admin for admin in self.admin_bypass if re.search(rf"\\b{re.escape(admin)}\\b", line)), None)
-                    if actor:
+                    if actor in self.admin_bypass:
                         continue
                     await self.send_alert(line)
 
@@ -75,3 +75,4 @@ class AdminLogMonitor:
             await asyncio.sleep(3)
 
 __all__ = ["AdminLogMonitor"]
+
