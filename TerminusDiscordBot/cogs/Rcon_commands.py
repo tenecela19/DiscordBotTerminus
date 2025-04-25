@@ -3,6 +3,8 @@ from nextcord.ext import commands
 from nextcord import Interaction, SlashOption
 from zomboid_rcon import ZomboidRCON
 from dotenv import load_dotenv
+from utils.embed_factory import create_embed_response
+
 import os
 
 load_dotenv()
@@ -29,10 +31,11 @@ class Rcon_commands(commands.Cog):
     async def addvehicle(
         self,
         interaction: Interaction,
-        user: str = SlashOption(description="In-game username")
+        user: str = SlashOption(description="In-game username or x,y,z")
+        script: str = SlashOption(description="Script car name")
     ):
         await interaction.response.defer()
-        result = self.zrcon.addvehicle(user)
+        result = self.zrcon.command("addvehicle", f'{script} "{user}"')
         await interaction.followup.send(f"✅ {result.response}")
 
     @nextcord.slash_command(name="addxp", description="Give XP to a player", guild_ids=[testServerId])
@@ -61,7 +64,7 @@ class Rcon_commands(commands.Cog):
         newoption: str = SlashOption(description="New value")
     ):
         await interaction.response.defer()
-        result = self.zrcon.changeoption(option,newoption)
+        result = self.zrcon.command("changeoption", f'{option} "{newOption}"')
         await interaction.followup.send(f"✅ {result.response}")
 
     @nextcord.slash_command(name="chopper", description="Trigger helicopter event on random player", guild_ids=[testServerId])
@@ -85,10 +88,12 @@ class Rcon_commands(commands.Cog):
     async def createhorde(
         self,
         interaction: Interaction,
+        user: str = SlashOption(description="player name"),
         number: int = SlashOption(description="Number of zombies")
     ):
         await interaction.response.defer()
         result = self.zrcon.createhorde(number)
+        self.zrcon.command("createhorde", f'{number} "{user}"')
         await interaction.followup.send(f"✅ {result.response}")
  
     @nextcord.slash_command(name="godmode", description="Toggle godmode for a player", guild_ids=[testServerId])
@@ -111,15 +116,23 @@ class Rcon_commands(commands.Cog):
     async def command_help(self, interaction: Interaction):
         await interaction.response.defer()
         result = self.zrcon.help()
-        await interaction.followup.send(f"✅ {result.response}")
+        chunks = [text[i:i+1900] for i in range(0, len(text), 1900)]
+
+        for i, chunk in enumerate(chunks):
+            try:
+                await interaction.followup.send(f"```ini\n{chunk}\n```")
+            except nextcord.HTTPException as e:
+                await interaction.followup.send(f"❌ Failed to send part {i+1}: {str(e)}")
+                break
     @nextcord.slash_command(name="invisible", description="Make a player invisible to zombies", guild_ids=[testServerId])
     async def invisible(
         self,
         interaction: Interaction,
         user: str = SlashOption(description="In-game username")
+        toggle: str = SlashOption(description="true or false ")
     ):
         await interaction.response.defer()
-        result = self.zrcon.invisible(user)
+        result = self.zrcon.command("invisible", f'"{option}" -{newOption}')
         await interaction.followup.send(f"✅ {result.response}")
 
     @nextcord.slash_command(name="noclip", description="Allow player to walk through objects", guild_ids=[testServerId])
@@ -139,17 +152,22 @@ class Rcon_commands(commands.Cog):
         await interaction.followup.send(f"✅ {result.response}")
     @nextcord.slash_command(name="save", description="Save the world", guild_ids=[testServerId])
     async def save(self, interaction: Interaction):
+        await interaction.response.defer()
         result = self.zrcon.save()
-        await interaction.followup.send(f"✅ {result.response}")
+        await interaction.followup.send(f"✅ world saved")
         
     @nextcord.slash_command(name="showoptions", description="Show current server options", guild_ids=[testServerId])
     async def showoptions(self, interaction: Interaction):
         await interaction.response.defer()
         result = self.zrcon.showoptions()
-        chunks = [text[i:i+1990] for i in range(0, len(text), 1990)]
+        chunks = [text[i:i+1900] for i in range(0, len(text), 1900)]
+
         for i, chunk in enumerate(chunks):
-            header = f"📄 Part {i+1}/{len(chunks)}\n"
-            await interaction.followup.send(f"```ini\n{header}{chunk}\n```")
+            try:
+                await interaction.followup.send(f"```ini\n{chunk}\n```")
+            except nextcord.HTTPException as e:
+                await interaction.followup.send(f"❌ Failed to send part {i+1}: {str(e)}")
+                break
 
     @nextcord.slash_command(name="startrain", description="Start rain on the server", guild_ids=[testServerId])
     async def startrain(self, interaction: Interaction):
