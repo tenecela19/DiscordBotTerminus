@@ -13,7 +13,7 @@ class Rcon_commands(commands.Cog):
         self.zrcon = zrcon
     
     testServerId = 928563012875468801
-
+    emoji = "✅" if getattr(response, "success", True) else "❌"
     @nextcord.slash_command(name="additem", description="Give item to player", guild_ids=[testServerId])
     async def additem(
         self,
@@ -21,8 +21,8 @@ class Rcon_commands(commands.Cog):
         user: str = SlashOption(description="In-game username"),
         item: str = SlashOption(description="Item ID")
     ):
-        self.zrcon.additem(user, item)
-        await interaction.response.send_message(f"✅ Added **{item}** to `{user}`'s inventory!")
+        result = self.zrcon.additem(user, item)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="addvehicle", description="Spawn a vehicle for a player", guild_ids=[testServerId])
     async def addvehicle(
@@ -30,8 +30,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="In-game username")
     ):
-        self.zrcon.addvehicle(user)
-        await interaction.response.send_message(f"✅ Spawned a vehicle for `{user}`!")
+        result = self.zrcon.addvehicle(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="addxp", description="Give XP to a player", guild_ids=[testServerId])
     async def addxp(
@@ -41,13 +41,13 @@ class Rcon_commands(commands.Cog):
         perk: str = SlashOption(description="Perk name"),
         xp: int = SlashOption(description="Amount of XP")
     ):
-        self.zrcon.addxp(user, perk, xp)
-        await interaction.response.send_message(f"✅ Gave **{xp} XP** in **{perk}** to `{user}`!")
+        result = self.zrcon.addxp(user, perk, xp)
+        await interaction.response.send_message(f"{emoji} {result.response}")
     
     @nextcord.slash_command(name="alarm", description="Sound a building alarm at your position", guild_ids=[testServerId])
     async def alarm(self, interaction: Interaction):
-        self.zrcon.alarm()
-        await interaction.response.send_message("✅ Alarm sounded at your current location!")
+        result = self.zrcon.alarm()
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="changeoption", description="Change a server option", guild_ids=[testServerId])
     async def changeoption(
@@ -56,13 +56,13 @@ class Rcon_commands(commands.Cog):
         option: str = SlashOption(description="Option name"),
         newoption: str = SlashOption(description="New value")
     ):
-        self.zrcon.changeoption(option,newoption)
-        await interaction.response.send_message(f"✅ Changed option `{option}` to `{newoption}`!")
+        result = self.zrcon.changeoption(option,newoption)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="chopper", description="Trigger helicopter event on random player", guild_ids=[testServerId])
     async def chopper(self, interaction: Interaction):
-        self.zrcon.chopper()
-        await interaction.response.send_message("✅ Helicopter event triggered on a random player!")
+        result = self.zrcon.chopper()
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="changepwd", description="Change your admin password", guild_ids=[testServerId])
     async def changepwd(
@@ -71,8 +71,8 @@ class Rcon_commands(commands.Cog):
         pwd: str = SlashOption(description="Current password"),
         newpwd: str = SlashOption(description="New password")
     ):
-        self.zrcon.changepwd(pwd,newpwd)
-        await interaction.response.send_message("✅ Admin password changed successfully!")    
+        result = self.zrcon.changepwd(pwd,newpwd)
+        await interaction.response.send_message(f"{emoji} {result.response}")    
     
     @nextcord.slash_command(name="createhorde", description="Spawn a horde near a player", guild_ids=[testServerId])
     async def createhorde(
@@ -80,8 +80,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         number: int = SlashOption(description="Number of zombies")
     ):
-        self.zrcon.createhorde(number)
-        await interaction.response.send_message(f"✅ Spawned a horde of **{number}** zombies!")
+        result = self.zrcon.createhorde(number)
+        await interaction.response.send_message(f"{emoji} {result.response}")
  
     @nextcord.slash_command(name="godmode", description="Toggle godmode for a player", guild_ids=[testServerId])
     async def godmode(
@@ -89,27 +89,26 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="In-game username")
     ):
-        self.zrcon.godmode(user)
-        await interaction.response.send_message(f"✅ Toggled godmode for `{user}`!")
+        result = self.zrcon.godmode(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="gunshot", description="Make a gunshot sound near the player", guild_ids=[testServerId])
     async def gunshot(self, interaction: Interaction):
         self.zrcon.gunshot()
-        await interaction.response.send_message("✅ Gunshot sound triggered!")
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="help", description="Display native RCON help menu", guild_ids=[testServerId])
     async def command_help(self, interaction: Interaction):
-        self.zrcon.help()
-        await interaction.response.send_message("✅ Help menu opened. Check your client or console!")
-
+        result = self.zrcon.help()
+        await interaction.response.send_message(f"{emoji} {result.response}")
     @nextcord.slash_command(name="invisible", description="Make a player invisible to zombies", guild_ids=[testServerId])
     async def invisible(
         self,
         interaction: Interaction,
         user: str = SlashOption(description="In-game username")
     ):
-        self.zrcon.invisible(user)
-        await interaction.response.send_message(f"✅ `{user}` is now invisible to zombies!")
+        result = self.zrcon.invisible(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="noclip", description="Allow player to walk through objects", guild_ids=[testServerId])
     async def noclip(
@@ -117,32 +116,32 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="In-game username")
     ):
-        self.zrcon.noclip(user)
-        await interaction.response.send_message(f"✅ Noclip enabled for `{user}`!")
+        result = self.zrcon.noclip(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="reloadoptions", description="Reload server options", guild_ids=[testServerId])
     async def reloadoptions(self, interaction: Interaction):
-        self.zrcon.reloadoptions()
-        await interaction.response.send_message("✅ Server options reloaded!")
+        result = self.zrcon.reloadoptions()
+        await interaction.response.send_message(f"{emoji} {result.response}")
     @nextcord.slash_command(name="save", description="Save the world", guild_ids=[testServerId])
     async def save(self, interaction: Interaction):
-        self.zrcon.save()
-        await interaction.response.send_message("✅ World saved successfully!")
+        result = self.zrcon.save()
+        await interaction.response.send_message(f"{emoji} {result.response}")
         
     @nextcord.slash_command(name="showoptions", description="Show current server options", guild_ids=[testServerId])
     async def showoptions(self, interaction: Interaction):
-        self.zrcon.showoptions()
-        await interaction.response.send_message("✅ Displayed server options (check client console)")
+        result = self.zrcon.showoptions()
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="startrain", description="Start rain on the server", guild_ids=[testServerId])
     async def startrain(self, interaction: Interaction):
-        self.zrcon.startrain()
-        await interaction.response.send_message("🌧️ Rain started!")
+        result = self.zrcon.startrain()
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="stoprain", description="Stop rain on the server", guild_ids=[testServerId])
     async def stoprain(self, interaction: Interaction):
-        self.zrcon.stoprain()
-        await interaction.response.send_message("🌤️ Rain stopped!")
+        result = self.zrcon.stoprain()
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="teleport", description="Teleport one player to another", guild_ids=[testServerId])
     async def teleport(
@@ -151,14 +150,14 @@ class Rcon_commands(commands.Cog):
         user: str = SlashOption(description="Player to teleport"),
         touser: str = SlashOption(description="Destination player")
     ):
-        self.zrcon.teleport(user,touser)
-        await interaction.response.send_message(f"✅ Teleported `{user}` to `{toUser}`!")
+        result = self.zrcon.teleport(user,touser)
+        await interaction.response.send_message(f"{emoji} {result.response}")
     
     
     @nextcord.slash_command(name="addalltowhitelist", description="Add all connected users with password to whitelist", guild_ids=[testServerId])
     async def addalltowhitelist(self, interaction: Interaction):
-        self.zrcon.addalltowhitelist()
-        await interaction.response.send_message("✅ All connected users added to whitelist!")
+        result = self.zrcon.addalltowhitelist()
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="adduser", description="Add a new user to whitelist", guild_ids=[testServerId])
     async def adduser(
@@ -167,8 +166,8 @@ class Rcon_commands(commands.Cog):
         user: str = SlashOption(description="Username"),
         pwd: str = SlashOption(description="Password")
     ):
-        self.zrcon.adduser(user, pwd)
-        await interaction.response.send_message(f"✅ User `{user}` added to whitelist!")
+        result = self.zrcon.adduser(user, pwd)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="addusertowhitelist", description="Add a single user to whitelist", guild_ids=[testServerId])
     async def addusertowhitelist(
@@ -176,8 +175,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="Username")
     ):
-        self.zrcon.addusertowhitelist(user)
-        await interaction.response.send_message(f"✅ Added `{user}` to whitelist!")
+        result = self.zrcon.addusertowhitelist(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="removeuserfromwhitelist", description="Remove user from whitelist", guild_ids=[testServerId])
     async def removeuserfromwhitelist(
@@ -185,8 +184,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="Username")
     ):
-        self.zrcon.removeuserfromwhitelist(user)
-        await interaction.response.send_message(f"✅ Removed `{user}` from whitelist!")
+        result = self.zrcon.removeuserfromwhitelist(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="banid", description="Ban a Steam ID", guild_ids=[testServerId])
     async def banid(
@@ -194,8 +193,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         steamid: str = SlashOption(description="Steam ID")
     ):
-        self.zrcon.banid(steamid)
-        await interaction.response.send_message(f"✅ Banned Steam ID `{steamid}`!")
+        result = self.zrcon.banid(steamid)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="unbanid", description="Unban a Steam ID", guild_ids=[testServerId])
     async def unbanid(
@@ -203,8 +202,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         steamid: str = SlashOption(description="Steam ID")
     ):
-        self.zrcon.unbanid(steamid)
-        await interaction.response.send_message(f"✅ Unbanned Steam ID `{steamid}`!")
+        result = self.zrcon.unbanid(steamid)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="banuser", description="Ban a user", guild_ids=[testServerId])
     async def banuser(
@@ -212,8 +211,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="Username")
     ):
-        self.zrcon.banuser(user)
-        await interaction.response.send_message(f"✅ Banned user `{user}`!")
+        result = self.zrcon.banuser(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="unbanuser", description="Unban a user", guild_ids=[testServerId])
     async def unbanuser(
@@ -221,13 +220,13 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="Username")
     ):
-        self.zrcon.unbanuser(user)
-        await interaction.response.send_message(f"✅ Unbanned user `{user}`!")
+        result = self.zrcon.unbanuser(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="checkmodsneedupdate", description="Check if any mods need an update", guild_ids=[testServerId])
     async def checkmodsneedupdate(self, interaction: Interaction):
-        self.zrcon.checkModsNeedUpdate()
-        await interaction.response.send_message("✅ Checked mod updates. See log file for results.")
+        result = self.zrcon.checkModsNeedUpdate()
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="grantadmin", description="Grant admin to a user", guild_ids=[testServerId])
     async def grantadmin(
@@ -235,8 +234,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="Username")
     ):
-        self.zrcon.grantadmin(user)
-        await interaction.response.send_message(f"✅ Granted admin rights to `{user}`!")
+        result = self.zrcon.grantadmin(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="removeadmin", description="Remove admin from a user", guild_ids=[testServerId])
     async def removeadmin(
@@ -244,8 +243,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="Username")
     ):
-        self.zrcon.removeadmin(user)
-        await interaction.response.send_message(f"✅ Removed admin rights from `{user}`!")
+        result = self.zrcon.removeadmin(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="kickuser", description="Kick a user from the server", guild_ids=[testServerId])
     async def kickuser(
@@ -253,13 +252,13 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         user: str = SlashOption(description="Username")
     ):
-        self.zrcon.kickuser(user)
-        await interaction.response.send_message(f"✅ Kicked `{user}` from the server!")
+        result = self.zrcon.kickuser(user)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="players", description="List connected players", guild_ids=[testServerId])
     async def players(self, interaction: Interaction):
         result = self.zrcon.players().response
-        await interaction.response.send_message(f"✅ Connected players:\n```{result}```")
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="servermsg", description="Send a message to all players", guild_ids=[testServerId])
     async def servermsg(
@@ -267,8 +266,8 @@ class Rcon_commands(commands.Cog):
         interaction: Interaction,
         message: str = SlashOption(description="Message to broadcast")
     ):
-        self.zrcon.servermsg(message)
-        await interaction.response.send_message("✅ Message sent to all players!")
+        result = self.zrcon.servermsg(message)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="setaccesslevel", description="Set access level of a player", guild_ids=[testServerId])
     async def setaccesslevel(
@@ -277,8 +276,8 @@ class Rcon_commands(commands.Cog):
         user: str = SlashOption(description="Username"),
         level: str = SlashOption(description="Access level (admin, moderator, overseer, gm, observer)")
     ):
-        self.zrcon.setaccesslevel(user,level)
-        await interaction.response.send_message(f"✅ Access level for `{user}` set to `{level}`!")
+        result = self.zrcon.setaccesslevel(user,level)
+        await interaction.response.send_message(f"{emoji} {result.response}")
 
     @nextcord.slash_command(name="voiceban", description="Toggle voice ban for user", guild_ids=[testServerId])
     async def voiceban(
@@ -287,8 +286,8 @@ class Rcon_commands(commands.Cog):
         user: str = SlashOption(description="Username"),
         toggle: str = SlashOption(description="-true to ban, -false to unban")
     ):
-        self.zrcon.voiceban(user,toggle)
-        await interaction.response.send_message(f"✅ Voice ban for `{user}` set to `{toggle}`!")
+        result = self.zrcon.voiceban(user,toggle)
+        await interaction.response.send_message(f"{emoji} {result.response}")
         
 def setup(bot):
     RCON_HOST = os.getenv("RCON_HOST")
