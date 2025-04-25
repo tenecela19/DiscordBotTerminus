@@ -3,6 +3,7 @@ import asyncio
 import os
 import re
 import json
+from utils.embed_factory import create_embed_response
 
 class ItemEditLogMonitor:
     def __init__(self, bot, channel_id, log_dir, admin_file_path):
@@ -32,11 +33,7 @@ class ItemEditLogMonitor:
     async def send_alert(self, line):
         channel = self.bot.get_channel(self.channel_id)
         if channel:
-            embed = discord.Embed(
-                title="🛠️ ITEM EDIT DETECTED",
-                description=f"```{line.strip()}```",
-                color=0xff5733
-            )
+            embed = create_embed_response("🛠️ ITEM EDIT DETECTED", line, color=0xff5733)
             await channel.send(embed=embed)
 
     async def scan_logs(self):

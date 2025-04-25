@@ -1,8 +1,9 @@
-import discord
+import nextcord
 import asyncio
 import os
 import re
 import json
+from utils.embed_factory import create_embed_response
 
 class AdminLogMonitor:
     def __init__(self, bot, channel_id, log_dir, admin_file_path):
@@ -28,11 +29,7 @@ class AdminLogMonitor:
     async def send_alert(self, line):
         channel = self.bot.get_channel(self.channel_id)
         if channel:
-            embed = discord.Embed(
-                title="🛡️ ADMIN ACTION DETECTED",
-                description=f"```{line.strip()}```",
-                color=0x7289da
-            )
+            embed = create_embed_response("🛡️ ADMIN ACTION DETECTED", line, color=0x7289da,code_block=True)
             await channel.send(embed=embed)
 
     def get_actor_name(self, line):
@@ -57,14 +54,14 @@ class AdminLogMonitor:
 
                 for line in new_lines:
                     actor = self.get_actor_name(line)
-                    if not actor:
-                        continue
-                    if re.search(r"granted\\s+\\d+\\s+access level", line, re.IGNORECASE):
+                    if re.search(r"granted\s+\d+\s+access level", line, re.IGNORECASE):
                         await self.send_alert(line)
                         continue
-                    if actor in self.admin_bypass:
+                    actor = next((admin for admin in self.admin_bypass if re.search(rf"\b{re.escape(admin)}\b", line)), None)
+                    if actor:
                         continue
                     await self.send_alert(line)
+                        
 
     async def loop(self):
         while True:
