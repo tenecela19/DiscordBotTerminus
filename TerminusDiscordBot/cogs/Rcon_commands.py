@@ -146,7 +146,10 @@ class Rcon_commands(commands.Cog):
     async def showoptions(self, interaction: Interaction):
         await interaction.response.defer()
         result = self.zrcon.showoptions()
-        await interaction.followup.send(f"✅ {result.response}")
+        chunks = [text[i:i+1990] for i in range(0, len(text), 1990)]
+        for i, chunk in enumerate(chunks):
+            header = f"📄 Part {i+1}/{len(chunks)}\n"
+            await interaction.followup.send(f"```ini\n{header}{chunk}\n```")
 
     @nextcord.slash_command(name="startrain", description="Start rain on the server", guild_ids=[testServerId])
     async def startrain(self, interaction: Interaction):
