@@ -31,7 +31,7 @@ class Rcon_commands(commands.Cog):
     async def addvehicle(
         self,
         interaction: Interaction,
-        user: str = SlashOption(description="In-game username or x,y,z")
+        user: str = SlashOption(description="In-game username or x,y,z"),
         script: str = SlashOption(description="Script car name")
     ):
         await interaction.response.defer()
@@ -128,7 +128,7 @@ class Rcon_commands(commands.Cog):
     async def invisible(
         self,
         interaction: Interaction,
-        user: str = SlashOption(description="In-game username")
+        user: str = SlashOption(description="In-game username"),
         toggle: str = SlashOption(description="true or false ")
     ):
         await interaction.response.defer()
