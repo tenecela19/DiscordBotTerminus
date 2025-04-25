@@ -320,7 +320,7 @@ class Rcon_commands(commands.Cog):
     ):
         await interaction.response.defer()
         result = self.zrcon.voiceban(user,toggle)
-       await interaction.followup.send(f"✅ {result.response}")
+        await interaction.followup.send(f"✅ {result.response}")
         
 def setup(bot):
     RCON_HOST = os.getenv("RCON_HOST")
