@@ -129,10 +129,10 @@ class Rcon_commands(commands.Cog):
         self,
         interaction: Interaction,
         user: str = SlashOption(description="In-game username"),
-        toggle: str = SlashOption(description="true or false ")
+        toggle: str = SlashOption(description="SET '-' -true or -false ")
     ):
         await interaction.response.defer()
-        result = self.zrcon.command("invisible", f'"{user}" -{toggle}')
+        result = self.zrcon.command("invisible", f'"{user}" {toggle}')
         await interaction.followup.send(f"✅ {result.response}")
 
     @nextcord.slash_command(name="noclip", description="Allow player to walk through objects", guild_ids=[testServerId])
