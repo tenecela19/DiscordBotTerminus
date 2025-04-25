@@ -257,7 +257,7 @@ class Rcon_commands(commands.Cog):
 
     @nextcord.slash_command(name="players", description="List connected players", guild_ids=[testServerId])
     async def players(self, interaction: Interaction):
-        result = self.zrcon.players().response
+        result = self.zrcon.players()
         await interaction.response.send_message(result.response)
 
     @nextcord.slash_command(name="servermsg", description="Send a message to all players", guild_ids=[testServerId])
