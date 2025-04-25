@@ -115,8 +115,8 @@ class Rcon_commands(commands.Cog):
     @nextcord.slash_command(name="help", description="Display native RCON help menu", guild_ids=[testServerId])
     async def command_help(self, interaction: Interaction):
         await interaction.response.defer()
-        result = self.zrcon.help()
-        chunks = [text[i:i+1900] for i in range(0, len(text), 1900)]
+        result = self.zrcon.help().response
+        chunks = [result[i:i+1900] for i in range(0, len(result), 1900)]
 
         for i, chunk in enumerate(chunks):
             try:
@@ -159,8 +159,8 @@ class Rcon_commands(commands.Cog):
     @nextcord.slash_command(name="showoptions", description="Show current server options", guild_ids=[testServerId])
     async def showoptions(self, interaction: Interaction):
         await interaction.response.defer()
-        result = self.zrcon.showoptions()
-        chunks = [text[i:i+1900] for i in range(0, len(text), 1900)]
+        result = self.zrcon.showoptions().response
+        chunks = [result[i:i+1900] for i in range(0, len(result), 1900)]
 
         for i, chunk in enumerate(chunks):
             try:
