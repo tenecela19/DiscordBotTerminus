@@ -64,7 +64,7 @@ class Rcon_commands(commands.Cog):
         newoption: str = SlashOption(description="New value")
     ):
         await interaction.response.defer()
-        result = self.zrcon.command("changeoption", f'{option} "{newOption}"')
+        result = self.zrcon.command("changeoption", f'{option} "{newoption}"')
         await interaction.followup.send(f"✅ {result.response}")
 
     @nextcord.slash_command(name="chopper", description="Trigger helicopter event on random player", guild_ids=[testServerId])
