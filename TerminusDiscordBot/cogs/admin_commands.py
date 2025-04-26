@@ -8,7 +8,7 @@ class BypassAdminLogs(commands.Cog):
     def __init__(self, bot, admin_manager):
         self.bot = bot
         self.admin_manager = admin_manager
-    testServerId = 928563012875468801
+    testServerId = 123456
 
     @nextcord.slash_command(name="addbypassadmin", description="Add user to bypass admin list", guild_ids=[testServerId],default_member_permissions=nextcord.Permissions(administrator=True))
     async def add_admin(
