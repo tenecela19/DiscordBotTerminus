@@ -14,7 +14,7 @@ class Rcon_commands(commands.Cog):
         self.bot = bot
         self.zrcon = zrcon
     
-    testServerId = 928563012875468801
+    testServerId = 123456789
    
     @nextcord.slash_command(name="additem", description="Give item to player", guild_ids=[testServerId],default_member_permissions=nextcord.Permissions(administrator=True),default_member_permissions=nextcord.Permissions(administrator=True))
     async def additem(
