@@ -315,4 +315,3 @@ class PerkLogMonitor:
                     await self._send_grouped_alert(steamid)
             
             await asyncio.sleep(1)
-
