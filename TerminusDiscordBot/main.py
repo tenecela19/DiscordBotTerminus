@@ -57,4 +57,3 @@ if __name__ == "__main__":
         bot.load_extension(extension)
 
 bot.run(DISCORD_TOKEN)
-
