@@ -27,12 +27,12 @@ LOG_DIR = os.getenv("LOG_DIR")
 EXPLOIT_LOG_PATH = os.getenv("EXPLOIT_LOG_PATH")
 LEVEL_WINDOW = int(os.getenv("LEVEL_WINDOW", 5))
 SRJ_GRACE = int(os.getenv("SRJ_GRACE", 10))
-
+SRJ_MAX_DRATION =int(os.getenv("SRJ_MAX_DRATION", 15))
 # --- Initialize Monitors ---
 admin_file_path = os.path.join(os.path.dirname(__file__), "admin_bypass.json")
 item_edit_monitor = ItemEditLogMonitor(bot, CHANNEL_ID, LOG_DIR,admin_file_path)
 admin_log_monitor = AdminLogMonitor(bot, CHANNEL_ID, LOG_DIR,admin_file_path)
-perk_monitor = PerkLogMonitor(bot, CHANNEL_ID,LOG_DIR, srj_grace=SRJ_GRACE, suspicious_window=LEVEL_WINDOW)
+perk_monitor = PerkLogMonitor(bot, CHANNEL_ID,LOG_DIR, srj_grace=SRJ_GRACE, suspicious_window=LEVEL_WINDOW,srj_max_duration=SRJ_MAX_DRATION)
 exploit_monitor = ExploitLogMonitor(bot, CHANNEL_ID, EXPLOIT_LOG_PATH)
 
 @bot.event
@@ -57,3 +57,4 @@ if __name__ == "__main__":
         bot.load_extension(extension)
 
 bot.run(DISCORD_TOKEN)
+
