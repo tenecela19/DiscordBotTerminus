@@ -8,9 +8,9 @@ class BypassAdminLogs(commands.Cog):
     def __init__(self, bot, admin_manager):
         self.bot = bot
         self.admin_manager = admin_manager
-    testServerId = 123456
+    testServerId = 1349396630880915570
 
-    @nextcord.slash_command(name="addbypassadmin", description="Add user to bypass admin list", guild_ids=[testServerId],default_member_permissions=nextcord.Permissions(administrator=True))
+    @nextcord.slash_command(name="addbypassadmin", description="Add user to bypass admin list", guild_ids=[testServerId])
     async def add_admin(
         self,
         interaction: Interaction,
@@ -27,7 +27,7 @@ class BypassAdminLogs(commands.Cog):
         else:
             await interaction.response.send_message(f"⚠️ `{name}` is already in the admin list.")
 
-    @nextcord.slash_command(name="removebypassadmin", description="Remove user from bypass admin list", guild_ids=[testServerId],default_member_permissions=nextcord.Permissions(administrator=True))
+    @nextcord.slash_command(name="removebypassadmin", description="Remove user from bypass admin list", guild_ids=[testServerId])
     async def remove_admin(
         self,
         interaction: Interaction,
@@ -43,7 +43,7 @@ class BypassAdminLogs(commands.Cog):
         else:
             await interaction.response.send_message(f"❌ `{name}` is not in the admin list.")
 
-    @nextcord.slash_command(name="listbypassadmins", description="List all bypassed admin users", guild_ids=[testServerId],default_member_permissions=nextcord.Permissions(administrator=True))
+    @nextcord.slash_command(name="listbypassadmins", description="List all bypassed admin users", guild_ids=[testServerId])
     async def list_admins(self, interaction: Interaction):
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message("❌ You don't have permission to use this command.", ephemeral=True)
@@ -59,4 +59,3 @@ class BypassAdminLogs(commands.Cog):
 def setup(bot):
     admin_manager = AdminBypassManager()
     bot.add_cog(BypassAdminLogs(bot, admin_manager))
-
