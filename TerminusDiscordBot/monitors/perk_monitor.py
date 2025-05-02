@@ -1,22 +1,23 @@
-import discord
+import nextcord
 import asyncio
 import os
 import re
 from datetime import datetime, timedelta
 import logging
+from utils.embed_factory import create_embed_response
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class PerkLogMonitor:
-    def __init__(self, bot, channel_id, log_dir, srj_grace=10, suspicious_window=5,srj_max_duration=15):
+    def __init__(self, bot, channel_id,srj_grace=10, suspicious_window=5,srj_max_duration=15):
         self.bot = bot
         self.channel_id = channel_id
         self.log_dir = log_dir
         self.srj_grace = srj_grace
         self.suspicious_window = suspicious_window
         self.srj_max_duration = srj_max_duration  # Maximum time in seconds to keep SRJ status (5 minutes default)
-        
+            
         # Tracking dictionaries
         self.active_srj_readers = {}  # {steamid: {'start_time': datetime, 'end_time': datetime}}
         self.player_skills = {}       # {steamid: {skill: {'last_level': level, 'last_time': time}}}
@@ -26,7 +27,8 @@ class PerkLogMonitor:
         self.last_position = None
 
         self.suspicious_buffer = {}  # {steamid: {'username': str, 'skills': [], 'timestamp': datetime}}
-        self.alert_cooldown = 30  # seconds to wait before sending grouped alerts        
+        self.alert_cooldown = 30  # seconds to wait before sending grouped alerts
+     
         # Regex patterns
         self.patterns = {
             'perk': re.compile(
@@ -67,11 +69,11 @@ class PerkLogMonitor:
             # Check if max duration exceeded
             if (current_time - srj_data['start_time']).total_seconds() > self.srj_max_duration:
                 expired_steamids.append(steamid)
-                logger.info(f"SRJ session expired for {steamid} (max duration exceeded)")
+               # logger.info(f"SRJ session expired for {steamid} (max duration exceeded)")
             # Check if grace period exceeded
             elif current_time > srj_data['end_time']:
                 expired_steamids.append(steamid)
-                logger.info(f"SRJ session expired for {steamid} (grace period ended)")
+                #logger.info(f"SRJ session expired for {steamid} (grace period ended)")
         
         # Remove expired sessions
         for steamid in expired_steamids:
@@ -88,7 +90,7 @@ class PerkLogMonitor:
             else:
                 # Clean up expired SRJ session
                 self.active_srj_readers.pop(steamid)
-                logger.info(f"SRJ session expired for {steamid}")
+              #  logger.info(f"SRJ session expired for {steamid}")
         return False
 
     async def _send_grouped_alert(self, steamid):
@@ -110,15 +112,18 @@ class PerkLogMonitor:
                     f"• {skill} ({old_level} → {new_level}) in {delta:.1f}s"
                     for skill, old_level, new_level, delta in skills
                 ])
-
-                embed = discord.Embed(
+                
+                message = (
+                    f"**Player:** {username}\n"
+                    f"**Steam ID:** {steamid}\n\n"
+                    f"**Suspicious Skills Gains:**\n{skill_text}"
+                )              
+                
+                embed = create_embed_response(
                     title="🚨 Suspicious Level Gains Detected",
-                    description=(
-                        f"**Player:** {username}\n"
-                        f"**Steam ID:** {steamid}\n\n"
-                        f"**Suspicious Skills Gains:**\n{skill_text}"
-                    ),
+                    message=message,
                     color=0xFF5733,
+                    code_block=False,  # We want rich formatting (bold), not inside ```
                     timestamp=data['timestamp']
                 )
                 await channel.send(embed=embed)
@@ -132,7 +137,6 @@ class PerkLogMonitor:
     async def _buffer_suspicious_activity(self, steamid, username, skill, old_level, new_level, delta):
         """Buffer suspicious activity for grouped alerts"""
         current_time = datetime.now()
-
         if steamid not in self.suspicious_buffer:
             self.suspicious_buffer[steamid] = {
                 'username': username,
@@ -167,7 +171,7 @@ class PerkLogMonitor:
                 steamid = match.group(2)
                 if steamid in self.active_srj_readers:
                     self.active_srj_readers.pop(steamid)
-                    logger.info(f"SRJ stop detected for {steamid}")
+                #    logger.info(f"SRJ stop detected for {steamid}")
                 return
 
             # Then check for perk changes
@@ -181,7 +185,7 @@ class PerkLogMonitor:
 
                 # Important: Check SRJ status first
                 if self._is_reading_srj(steamid, time):
-                    logger.info(f"Ignoring level change for {username} - Currently reading SRJ")
+                  #  logger.info(f"Ignoring level change for {username} - Currently reading SRJ")
                     return
 
                 # Only then check for suspicious gains
@@ -235,29 +239,7 @@ class PerkLogMonitor:
             return True, time_delta, old_level
 
         return False, time_delta, old_level
-
-    async def _send_alert(self, steamid, username, skill, old_level, new_level, 
-                         delta, hours_survived):
-        """Send suspicious activity alert to Discord"""
-        try:
-            channel = self.bot.get_channel(self.channel_id)
-            if channel:
-                embed = discord.Embed(
-                    title="Suspicious Level Gain Detected",
-                    description=(
-                        f"Player: {username}\n"
-                        f"Steam ID: {steamid}\n"
-                        f"Skill: {skill}\n"
-                        f"Level Change: {old_level} → {new_level}\n"
-                        f"Time Delta: {delta:.1f}s\n"
-                        f"Hours Survived: {hours_survived}"
-                    ),
-                    color=0xFF5733
-                )
-                await channel.send(embed=embed)
-        except Exception as e:
-            logger.error(f"Failed to send alert: {e}")
-
+        
     def _get_latest_log(self):
         """Get the most recent log file"""
         try:
@@ -275,7 +257,7 @@ class PerkLogMonitor:
         log_path = self._get_latest_log()
         if not log_path:
             return
-
+        self.admin_bypass.reload_if_needed()
         try:
             # Handle log file rotation or first run
             if self.current_log != log_path:
@@ -314,4 +296,5 @@ class PerkLogMonitor:
                 if (current_time - self.suspicious_buffer[steamid]['timestamp']).total_seconds() >= self.alert_cooldown:
                     await self._send_grouped_alert(steamid)
             
-            await asyncio.sleep(1)
+            await asyncio.sleep(5)
+
