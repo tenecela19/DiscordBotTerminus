@@ -1,73 +1,34 @@
-from datetime import datetime
-import nextcord
-from nextcord.ext import commands, tasks
-from file_read_backwards import FileReadBackwards
 import os
 import hashlib
-import monitors.modUpdater
+from datetime import datetime
+from nextcord.ext import commands, tasks
+from file_read_backwards import FileReadBackwards
 
-class consoleReader(commands.Cog):
-    def __init__(self, bot, logPath):
+class ConsoleReader(commands.Cog):
+    def __init__(self, bot):
         self.bot = bot
-        self.logPath = logPath
-        self.lastMessageHash = None
-        self.lastUpdateRealTimestamp = datetime.now().timestamp() * 1000
-        self.sendLogs = True
-
-        self.update.start()  # Start background loop
-
-    def splitLine(self, line: str) -> tuple[int, str]:
-        try:
-            _, timestamp_part, message = line.strip()[1:].split(">", 2)
-            timestamp_str = timestamp_part[timestamp_part.find(",", 2) + 1:].strip().replace(" ", "").replace(",", "")
-            return int(timestamp_str), message
-        except Exception as e:
-            self.bot.log.warning(f"[consoleReader] Failed to parse log line: {line.strip()} ({e})")
-            return 0, ""
+        self.channel_id = int(os.getenv("CHANNEL_ID"))
+        self.pz_path = os.getenv("PZ_PATH")
+        self.console_path = os.path.join(self.pz_path, "server-console.txt")
+        self.last_hash = None
+        self.monitor_logs.start()
 
     @tasks.loop(seconds=2)
-    async def update(self) -> None:
-        log_file = os.path.join(self.logPath, "server-console.txt")
-        if not os.path.exists(log_file):
+    async def monitor_logs(self):
+        if not os.path.exists(self.console_path):
+            print("⚠️ server-console.txt not found.")
             return
 
-        print("[consoleReader] 🔄 Loop tick")
-
-        with FileReadBackwards(log_file, encoding="utf-8") as f:
+        with FileReadBackwards(self.console_path, encoding="utf-8") as f:
             for line in f:
-                if "LOG" not in line:
-                    continue
+                if "CheckModsNeedUpdate: Mods need update" in line:
+                    line_hash = hashlib.md5(line.encode()).hexdigest()
+                    if line_hash != self.last_hash:
+                        await self.alert_discord()
+                        self.last_hash = line_hash
+                    break  # Stop after finding first match
 
-                print(f"[consoleReader] 📝 Read line: {line.strip()}")
-
-                timestamp, message = self.splitLine(line)
-                if timestamp >= self.lastUpdateRealTimestamp:
-                    messageHash = hashlib.md5(line.encode("utf-8")).hexdigest()
-                    if messageHash != self.lastMessageHash:
-                        embed = await self.readLog(timestamp, message)
-                        self.lastMessageHash = messageHash
-
-                        if embed and hasattr(self.bot, "channel") and self.bot.channel:
-                            await self.bot.channel.send(embed=embed)
-                else:
-                    self.lastUpdateRealTimestamp = datetime.now().timestamp() * 1000
-                    break
-
-    async def readLog(self, timestamp: int, message: str) -> None:
-        if "CheckModsNeedUpdate: Mods updated" in message:
-            self.bot.log.info("[consoleReader] All mods are up-to-date.")
-
-        elif "CheckModsNeedUpdate: Mods need update" in message:
-            self.bot.log.warning("[consoleReader] One or more mod(s) need to be updated.")
-            channel_id = int(os.getenv("CHANNEL_ID"))
-            channel = self.bot.get_channel(channel_id)
-            if channel:  # 🛠️ this line had a bad indent in your original code
-                await channel.send("📦 One or more mod(s) need to be updated.")
-                self.lastUpdateRealTimestamp = datetime.now().timestamp() * 1000
-                mod_updater = self.bot.get_cog("modUpdater")
-                if mod_updater:
-                    await mod_updater.startUpdate()
-        else:
-            self.bot.log.debug(f"[consoleReader] Ignored: {message}")
-
-        return None
+    async def alert_discord(self):
+        channel = self.bot.get_channel(self.channel_id)
+        if channel:
+            await channel.send("📦 One or more mod(s) need to be updated.")
