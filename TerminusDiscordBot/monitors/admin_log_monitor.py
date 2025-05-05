@@ -4,40 +4,52 @@ import os
 import re
 import json
 from utils.embed_factory import create_embed_response
-
+from utils.admin_bypass import AdminBypassManager  # <- import your class properly
 class AdminLogMonitor:
-    def __init__(self, bot, channel_id, log_dir, admin_file_path):
+    def __init__(self, bot, channel_id, log_dir,admin_bypass):
         self.bot = bot
         self.channel_id = channel_id
         self.log_dir = log_dir
-        self.admin_file_path = admin_file_path
         self.last_positions = {}
-        self.admin_bypass = set()
-        self.load_admins()
-
-    def load_admins(self):
-        try:
-            with open(self.admin_file_path, 'r') as f:
-                self.admin_bypass = set(json.load(f))
-        except (FileNotFoundError, json.JSONDecodeError):
-            self.admin_bypass = set()
-
-    def save_admins(self):
-        with open(self.admin_file_path, 'w') as f:
-            json.dump(list(self.admin_bypass), f)
-
+        self.last_cleanup = datetime.now()
+        self.cleanup_interval = 300  # seconds (5 minutes)
+        self.admin_bypass = admin_bypass       
     async def send_alert(self, line):
         channel = self.bot.get_channel(self.channel_id)
         if channel:
-            embed = create_embed_response("🛡️ ADMIN ACTION DETECTED", line, color=0x7289da,code_block=True)
+            embed = create_embed_response("🛡️ ADMIN ACTION DETECTED", line, color=0x7289da,code_block=True,timestamp=None)
             await channel.send(embed=embed)
-
+    def cleanup(self):
+        """Reset tracked file positions and internal state."""
+        print("[DEBUG] AdminLogMonitor cleanup triggered.")
+        self.last_positions.clear()
     def get_actor_name(self, line):
-        match = re.match(r"\[[^\]]+\](?:\s+\[[^\]]+\])?\s+(\w+)", line)
-        return match.group(1) if match else None
+        # Try to match "SOMETHING CHEAT: PlayerName WHATEVER"
 
+        patterns = [
+        # CHEAT commands (TELEPORT, VEHICLE, ITEM etc)
+            r"\[Buffy Logs\]\s+(?:[A-Z]+\s+)*CHEAT:\s+([a-zA-Z0-9_]+)",
+        # Standard admin actions
+            r"\[Buffy Logs\]\s+([a-zA-Z0-9_]+)\s",
+        # Fallback for any [Buffy Logs] line
+            r"\[Buffy Logs\]\s+([a-zA-Z0-9_]+)",
+
+            r"\[[^\]]+\](?:\s+\[[^\]]+\])?\s+([a-zA-Z0-9_]+)"
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, line)
+            if match:
+                name = match.group(1)
+                # Additional validation for CHEAT commands
+                if "CHEAT:" in line and not name.isupper():
+                    return name
+                elif "CHEAT:" not in line:
+                    return name
+    
+        return None
     async def scan_logs(self):
-        self.load_admins()
+        self.admin_bypass.reload_if_needed()
+
         for file in os.listdir(self.log_dir):
             if not file.endswith("_admin.txt"):
                 continue
@@ -54,21 +66,32 @@ class AdminLogMonitor:
 
                 for line in new_lines:
                     actor = self.get_actor_name(line)
+                    print(f"[DEBUG] FULL LINE: {line.strip()}")
+                    print(f"[DEBUG] EXTRACTED ACTOR: {actor}")
+
+                    if actor:
+                        actor = actor.strip()
                     if re.search(r"granted\s+\d+\s+access level", line, re.IGNORECASE):
                         await self.send_alert(line)
                         continue
-                    actor = next((admin for admin in self.admin_bypass if re.search(rf"\b{re.escape(admin)}\b", line)), None)
                     if actor:
-                        continue
+                        bypassed = self.admin_bypass.is_bypassed(actor)
+                        if bypassed:
+                            print(f"[DEBUG] Actor: '{actor}' - Bypassed: {bypassed}")
+                            continue
                     await self.send_alert(line)
                         
 
     async def loop(self):
         while True:
             try:
+                if (datetime.now() - self.last_cleanup).total_seconds() > self.cleanup_interval:
+                    self.cleanup()
+                    self.last_cleanup = datetime.now()
                 await self.scan_logs()
             except Exception as e:
                 print(f"[ADMIN LOG ERROR] {e}")
             await asyncio.sleep(3)
 
 __all__ = ["AdminLogMonitor"]
+
